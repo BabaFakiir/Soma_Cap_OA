@@ -1,0 +1,29 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Todo {
+  id           Int              @id @default(autoincrement())
+  title        String
+  dueDate      DateTime?
+  imageUrl     String?
+  createdAt    DateTime         @default(now())
+  dependencies TaskDependency[] @relation("DependentTasks")
+  dependents   TaskDependency[] @relation("RequiredTasks")
+}
+
+model TaskDependency {
+  id           Int   @id @default(autoincrement())
+  taskId       Int
+  dependsOnId  Int
+
+  task         Todo  @relation("DependentTasks", fields: [taskId], references: [id])
+  dependsOn    Todo  @relation("RequiredTasks", fields: [dependsOnId], references: [id])
+
+  @@unique([taskId, dependsOnId])
+}
